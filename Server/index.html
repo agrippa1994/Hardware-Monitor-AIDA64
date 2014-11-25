@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Dashboard Template for Bootstrap</title>
+
+    <link href="css/bootstrap.css" rel="stylesheet">
+  </head>
+
+  <body>
+ 
+		<table class="table table-striped">
+			<thead>
+				<tr>
+					<th>Kategorie</th>
+					<th>ID</th>
+					<th>Label</th>
+					<th>Wert</th>
+				</tr>
+			</thead>
+			<tbody id="mainTable">
+				
+			</tbody>
+		</table>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/jquery.canvasjs.min.js"></script>
+    <script type="text/javascript">
+
+    	var client = new WebSocket("ws://localhost:8080/");
+		client.onmessage = function (e) 
+		{
+			var sensorValues = JSON.parse(e.data);
+
+			$("#mainTable").empty();
+			$(sensorValues).each(function(idx, element)
+			{
+				$("#mainTable").append("<tr><td>" + element.category + "</td><td>" + element.id + "</td><td>" + element.label + "</td><td>" + element.value + "</td></tr>");
+			});
+        }
+ 
+    </script>
+  </body>
+</html>
