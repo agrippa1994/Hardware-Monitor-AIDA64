@@ -91,6 +91,7 @@
     <ClInclude Include="json_spirit\json_spirit_writer_options.h" />
     <ClInclude Include="json_spirit\json_spirit_writer_template.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="utility.h" />
     <ClInclude Include="Websocket.h" />
   </ItemGroup>
   <ItemGroup>

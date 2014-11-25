@@ -4,6 +4,7 @@
 #include "resource.h"
 #include "Client.h"
 #include "aida64.h"
+#include "utility.h"
 #include "json_spirit/json_spirit.h"
 
 #include <string>
@@ -183,7 +184,7 @@ void websocket_onFailedOrDisconnected()
 
 void CALLBACK timerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 {
-	try
+	execute_safe([&]()
 	{
 		aida64::API api;
 		if (!api.refreshData())
@@ -213,9 +214,5 @@ void CALLBACK timerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 		std::string data = write_formatted(Value(mainJsonObject));
 
 		websocket_send(data.c_str(), data.length(), false);
-	}
-	catch (const std::exception& e)
-	{
-
-	}
+	});
 }

@@ -16,7 +16,6 @@ std::vector<aida64::Data> aida64::API::readData()
 	std::stringstream ss(std::string((const char *)pStr));
 	std::vector<Data> data;
 
-	
 	boost::property_tree::ptree pt;
 	boost::property_tree::read_xml(ss, pt);
 
@@ -34,10 +33,15 @@ std::vector<aida64::Data> aida64::API::readData()
 		{
 			std::string value = u.second.get_value<std::string>();
 
-			if (idx == 0)	currentData.id = value;
-			else if (idx == 1)	currentData.label = value;
-			else if (idx == 2)	currentData.value = value;
-			else throw std::exception("Error while decomposing data");
+			if (idx == 0)	
+				currentData.id = value;
+			else if (idx == 1)	
+				currentData.label = value;
+			else if (idx == 2)	
+				currentData.value = value;
+			else 
+				throw std::exception("Error while decomposing data");
+
 			idx++;
 		}
 
@@ -61,11 +65,7 @@ aida64::API::~API()
 
 bool aida64::API::refreshData()
 {
-	data_ = readData();
-	if (data_.empty())
-		return false;
-
-	return true;
+	return !(data_ = readData()).empty();
 }
 
 const std::vector<aida64::Data>& aida64::API::data() const
