@@ -4,25 +4,28 @@ var fs = require("fs");
 var url = require("url");
 var path = require("path");
 
-function from_string(jsonString){
-    try {
-        var o = JSON.parse(jsonString);
-        if (o && typeof o === "object" && o !== null)
-            return o;
-    }
-    catch (e) { }
+function from_string(jsonString)
+{
+	try 
+	{
+		var o = JSON.parse(jsonString);
+		if (o && typeof o === "object" && o !== null)
+			return o;
+	}
+	catch (e) { }
 
-    return false;
+	return false;
 }
 
 function to_string(object) {
-	try {
+	try 
+	{
 		var s = JSON.stringify(object);
 		if(s && typeof s === "string" && s !== null)
 			return s;
 	}
 	catch(e) { }
-	
+
 	return false;
 }
 
@@ -35,15 +38,15 @@ function onClientConnect(connection)
 function onClientDisconnect(connection)
 {
 	var index = connections.indexOf(connection);
-	if(index > -1)
-		connections.splice(index, 1);
+		if(index > -1)
+			connections.splice(index, 1);
 }
 
 function onClientMessage(connection, messageStr)
 {
 	var message = from_string(messageStr);
-	if(message == false)
-		return;
+		if(message == false)
+			return;
 
 	if(!("computerName" in message && "sensorValues" in message))
 		return;
@@ -59,69 +62,42 @@ function onClientMessage(connection, messageStr)
 }
 
 
-var server = http.createServer(function(request, response) 
+var server = http.createServer();
+server.listen(8080);
+server.on("error", function(e)
 {
-    var uri = url.parse(request.url).pathname
-    , filename = path.join(process.cwd(), uri);
-
-  path.exists(filename, function(exists) {
-    if(!exists) {
-      response.writeHead(404, {"Content-Type": "text/plain"});
-      response.write("404 Not Found\n");
-      response.end();
-      return;
-    }
-
-    if (fs.statSync(filename).isDirectory()) filename += '/index.html';
-
-    fs.readFile(filename, "binary", function(err, file) {
-      if(err) {        
-        response.writeHead(500, {"Content-Type": "text/plain"});
-        response.write(err + "\n");
-        response.end();
-        return;
-      }
-
-      response.writeHead(200);
-      response.write(file, "binary");
-      response.end();
-    });
-  });
+	console.error("Error @http (" + e + ")");
 });
 
-server.listen(8080, function() 
+wsServer = new WebSocketServer(
 {
-    console.log((new Date()) + ' Server is listening on port 8080');
-});
-
-
-
-wsServer = new WebSocketServer({
-    httpServer: server,
-    autoAcceptConnections: false
+	httpServer: server,
+	autoAcceptConnections: false
 });
 
 wsServer.on('request', function(request) 
 {
-    var connection;
-    try
-    {
-    	connection = request.accept(null, request.origin);
-    }
-    catch(e)
-    {
-    	console.log("Illegal connection " + e);
-    	return;
-    }
+	var connection;
+	try
+	{
+		connection = request.accept(null, request.origin);
+	}
+	catch(e)
+	{
+		console.error("Illegal connection");
+		return;
+	}
 
-    onClientConnect(connection);
+	onClientConnect(connection);
 
-    connection.on('message', function(message) {
-        if (message.type === 'utf8') 
-        	onClientMessage(connection, message.utf8Data);
-    });
+	connection.on('message', function(message) 
+	{
+		if(message.type === 'utf8') 
+			onClientMessage(connection, message.utf8Data);
+	});
 
-    connection.on('close', function(reasonCode, description) {
-    	onClientDisconnect(connection);
-    });
+	connection.on('close', function(reasonCode, description) 
+	{
+		onClientDisconnect(connection);
+	});
 });
