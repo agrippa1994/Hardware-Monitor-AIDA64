@@ -3,11 +3,50 @@ var http = require('http');
 var fs = require("fs");
 var url = require("url");
 var path = require("path");
+var mysql = require("mysql");
+
+var mysql_connection;
+var httpServer;
+var wsServer;
+var connections = [];
+
+try {
+    httpServer = http.createServer();
+    httpServer.listen(from_string(fs.readFileSync("config.json")).http.port);
+} catch (err) {
+    console.log("Error while creating HTTP server: " + err);
+    process.exit();
+}
+
+try {
+    wsServer = new WebSocketServer({
+        httpServer: httpServer,
+        autoAcceptConnections: false
+    });
+} catch (err) {
+    console.error("Error while creating WebSocket server on the HTTP server socket: " + err);
+    process.exit();
+}
+
+try {
+    mysql_connection = mysql.createConnection(from_string(fs.readFileSync("config.json")).mysql);
+    mysql_connection.connect(function (err) {
+        if (err) {
+            console.error("Error while connecting to the datebase: " + err);
+            process.exit();
+        } else {
+            console.log("Connection to the database has been established");
+        }
+    });
+} catch (error) {
+    console.error("Error while creating mysql-connection: " + err);
+    process.exit();
+}
+
 
 function from_string(jsonString)
 {
-	try 
-	{
+	try {
 		var o = JSON.parse(jsonString);
 		if (o && typeof o === "object" && o !== null)
 			return o;
@@ -18,8 +57,7 @@ function from_string(jsonString)
 }
 
 function to_string(object) {
-	try 
-	{
+	try {
 		var s = JSON.stringify(object);
 		if(s && typeof s === "string" && s !== null)
 			return s;
@@ -29,31 +67,26 @@ function to_string(object) {
 	return false;
 }
 
-var connections = [];
-function onClientConnect(connection)
-{
-	connections.push(connection);
+function onClientConnect(connection) {
+    connections.push(connection);
 }
 
-function onClientDisconnect(connection)
-{
+function onClientDisconnect(connection) {
 	var index = connections.indexOf(connection);
 		if(index > -1)
 			connections.splice(index, 1);
 }
 
-function onClientMessage(connection, messageStr)
-{
+function onClientMessage(connection, messageStr) {
 	var message = from_string(messageStr);
 		if(message == false)
 			return;
 
-	if(!("computerName" in message && "sensorValues" in message))
+	if(!("computerName" in message && "sensorValues" in message && "userName" in message))
 		return;
-
+    
 	var sendee = to_string(message.sensorValues);
-	for(var i = 0; i < connections.length; i++)
-	{
+	for(var i = 0; i < connections.length; i++) {
 		if(connections[i] == connection)
 			continue;
 
@@ -61,43 +94,27 @@ function onClientMessage(connection, messageStr)
 	}
 }
 
-
-var server = http.createServer();
-server.listen(8080);
-server.on("error", function(e)
-{
+httpServer.on("error", function(e) {
 	console.error("Error @http (" + e + ")");
 });
 
-wsServer = new WebSocketServer(
-{
-	httpServer: server,
-	autoAcceptConnections: false
-});
-
-wsServer.on('request', function(request) 
-{
+wsServer.on('request', function(request) {
 	var connection;
-	try
-	{
+	try {
 		connection = request.accept(null, request.origin);
-	}
-	catch(e)
-	{
+	} catch(e) {
 		console.error("Illegal connection");
 		return;
 	}
 
 	onClientConnect(connection);
 
-	connection.on('message', function(message) 
-	{
+	connection.on('message', function(message) {
 		if(message.type === 'utf8') 
 			onClientMessage(connection, message.utf8Data);
 	});
 
-	connection.on('close', function(reasonCode, description) 
-	{
+	connection.on('close', function(reasonCode, description) {
 		onClientDisconnect(connection);
 	});
 });
