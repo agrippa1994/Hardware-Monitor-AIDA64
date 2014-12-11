@@ -72,3 +72,12 @@ const std::vector<aida64::Data>& aida64::API::data() const
 {
     return data_;
 }
+
+std::string aida64::API::computerName() const
+{
+    CHAR computerName[MAX_COMPUTERNAME_LENGTH + 1] = { 0 };
+    DWORD dwSize = MAX_COMPUTERNAME_LENGTH;
+    GetComputerNameA(computerName, &dwSize);
+
+    return computerName;
+}

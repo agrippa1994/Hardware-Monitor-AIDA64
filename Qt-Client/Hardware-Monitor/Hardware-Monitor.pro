@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui websockets
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -15,14 +15,11 @@ TEMPLATE = app
 SOURCES += main.cpp\
         MainWindow.cpp \
     aida64.cpp \
-    SettingsWindow.cpp \
-    ServerManager.cpp
+    SettingsWindow.cpp
 
 HEADERS  += MainWindow.h \
     aida64.h \
-    SettingsWindow.h \
-    ServerManager.h
+    SettingsWindow.h
 
 FORMS    += MainWindow.ui \
-    SettingsWindow.ui \
-    ServerManager.ui
+    SettingsWindow.ui

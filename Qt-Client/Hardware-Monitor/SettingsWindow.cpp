@@ -27,6 +27,16 @@ int SettingsWindow::timerInterval() const
     return ui->refreshRateSpinBox->value();
 }
 
+bool SettingsWindow::automaticallyConnect() const
+{
+    return ui->connectAutomaticallyCheckBox->isChecked();
+}
+
+QString SettingsWindow::serverIP() const
+{
+    return ui->serverIPLineEdit->text();
+}
+
 bool SettingsWindow::loadConfigurationFromFile()
 {
     QFile file("configuration");
@@ -37,11 +47,13 @@ bool SettingsWindow::loadConfigurationFromFile()
 
     int refreshRate = 0;
     bool connectAutomatically = false;
+    QString serverIP;
 
-    ds >> refreshRate >> connectAutomatically;
+    ds >> refreshRate >> connectAutomatically >> serverIP;
 
     ui->refreshRateSpinBox->setValue(refreshRate);
     ui->connectAutomaticallyCheckBox->setChecked(connectAutomatically);
+    ui->serverIPLineEdit->setText(serverIP);
 
     return true;
 }
@@ -55,7 +67,7 @@ bool SettingsWindow::saveConfigurationToFile()
     QByteArray data;
     QDataStream ds(&data, QIODevice::WriteOnly);
 
-    ds << ui->refreshRateSpinBox->value() << ui->connectAutomaticallyCheckBox->isChecked();
+    ds << ui->refreshRateSpinBox->value() << ui->connectAutomaticallyCheckBox->isChecked() << ui->serverIPLineEdit->text();
 
     return file.write(data) > 0;
 }

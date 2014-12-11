@@ -40,7 +40,7 @@
         <enum>Qt::SolidLine</enum>
        </property>
        <attribute name="horizontalHeaderVisible">
-        <bool>true</bool>
+        <bool>false</bool>
        </attribute>
        <attribute name="horizontalHeaderCascadingSectionResizes">
         <bool>true</bool>
@@ -114,8 +114,6 @@
     <property name="title">
      <string>Connection</string>
     </property>
-    <addaction name="actionServer_Manager"/>
-    <addaction name="separator"/>
     <addaction name="actionConnect"/>
     <addaction name="actionDisconnect"/>
    </widget>

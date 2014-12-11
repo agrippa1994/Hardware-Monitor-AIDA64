@@ -22,11 +22,13 @@ namespace aida64
 
         std::vector<Data> readData();
 
+
     public:
         API(const std::string& shmName = "AIDA64_SensorValues");
         ~API();
 
         bool refreshData();
         const std::vector<Data>& data() const;
+        std::string computerName() const;
     };
 }

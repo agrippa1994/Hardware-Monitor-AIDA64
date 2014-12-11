@@ -16,6 +16,8 @@ public:
     ~SettingsWindow();
 
     int timerInterval() const;
+    bool automaticallyConnect() const;
+    QString serverIP() const;
 
     bool loadConfigurationFromFile();
     bool saveConfigurationToFile();

@@ -3,8 +3,12 @@
 
 #include <QMainWindow>
 #include <QTimerEvent>
+#include <QWebSocket>
+#include <QHideEvent>
+#include <QShowEvent>
+#include <QSystemTrayIcon>
+
 #include "SettingsWindow.h"
-#include "ServerManager.h"
 
 namespace Ui {
 class MainWindow;
@@ -18,18 +22,28 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+public slots:
     void appendNetworkLog(const QString& s);
     void appendApplicationLog(const QString& s);
 
 protected:
     virtual void timerEvent(QTimerEvent *);
+    virtual void hideEvent(QHideEvent *p);
+    virtual void showEvent(QShowEvent *p);
 
 private:
     int m_timerID = 0;
 
     Ui::MainWindow *ui;
     SettingsWindow m_settingsWindow;
-    ServerManager m_serverManager;
+    QWebSocket m_webSocket;
+    QSystemTrayIcon m_systemTrayIcon;
+
+private slots:
+    void stateChanged(QAbstractSocket::SocketState state);
+    void onConnect();
+    void onDisconnect();
+    void trayActivated(QSystemTrayIcon::ActivationReason reason);
 };
 
 #endif // MAINWINDOW_H
