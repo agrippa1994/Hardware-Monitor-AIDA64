@@ -109,23 +109,20 @@ void MainWindow::timerEvent(QTimerEvent *)
                 for(const auto& i : data)
                 {
                     QJsonObject sensorValue;
-                    sensorValue["category"] = i.category.c_str();
-                    sensorValue["id"] = i.id.c_str();
-                    sensorValue["label"] = i.label.c_str();
-                    sensorValue["value"] = i.value.c_str();
+                    sensorValue["category"] = QString(i.category.c_str());
+                    sensorValue["id"] = QString(i.id.c_str());
+                    sensorValue["label"] = QString(i.label.c_str());
+                    sensorValue["value"] = QString(i.value.c_str());
 
                     array.push_back(sensorValue);
                 }
 
-                object["computerName"] = api.computerName().c_str();
+                object["computerName"] = QString(api.computerName().c_str());
                 object["sensorValues"] = array;
 
-                auto bytes = m_webSocket.sendTextMessage(QString(QJsonDocument(object).toJson()));
-                appendNetworkLog(QString().sprintf("Bytes sent: %d", bytes));
+                m_webSocket.sendTextMessage(QString(QJsonDocument(object).toJson()));
             }
         }
-
-        appendApplicationLog("Data successfully updated");
 
         killTimer(m_timerID);
         m_timerID = startTimer(m_settingsWindow.timerInterval());
@@ -163,22 +160,27 @@ void MainWindow::showEvent(QShowEvent *p)
 void MainWindow::stateChanged(QAbstractSocket::SocketState state)
 {
     QString text;
+
+    ui->actionConnect->setEnabled(false);
+    ui->actionDisconnect->setEnabled(false);
+
     switch(state)
     {
     case QAbstractSocket::UnconnectedState:
         text = "The WebSocket is not connected";
+        ui->actionConnect->setEnabled(true);
         break;
     case QAbstractSocket::HostLookupState:
         text = "The WebSocket is performing a host name lookup";
+        ui->actionDisconnect->setEnabled(true);
         break;
     case QAbstractSocket::ConnectingState:
         text = "The WebSocket has started establishing a connection";
+        ui->actionDisconnect->setEnabled(true);
         break;
     case QAbstractSocket::ConnectedState:
         text = "The WebSocket connection is established";
-        break;
-    case QAbstractSocket::ClosingState:
-        text = "The WebSocket is about to close (data may still be waiting to be written)";
+        ui->actionDisconnect->setEnabled(true);
         break;
     default:
         text = "Error";

@@ -16,6 +16,8 @@ std::vector<aida64::Data> aida64::API::readData()
     std::stringstream ss(std::string((const char *)pStr));
     std::vector<Data> data;
 
+    UnmapViewOfFile(pStr);
+
     boost::property_tree::ptree pt;
     boost::property_tree::read_xml(ss, pt);
 
