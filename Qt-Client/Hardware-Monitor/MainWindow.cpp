@@ -12,7 +12,7 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    m_systemTrayIcon(this)
+    m_systemTrayIcon(QIcon(":/icons/main.ico"), this) // Icon Source: http://www.iconarchive.com/show/vista-hardware-devices-icons-by-icons-land/Motherboard-icon.html
 {
     ui->setupUi(this);
 
@@ -21,12 +21,17 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(ui->actionConnect, SIGNAL(triggered()), SLOT(onConnect()));
     QObject::connect(ui->actionDisconnect, SIGNAL(triggered()), SLOT(onDisconnect()));
     QObject::connect(&m_systemTrayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), SLOT(trayActivated(QSystemTrayIcon::ActivationReason)));
+    QObject::connect(&m_systemTrayIconMenu, SIGNAL(triggered(QAction*)), SLOT(trayMenuTriggered(QAction*)));
 
     m_timerID = startTimer(m_settingsWindow.timerInterval());
 
     if(m_settingsWindow.automaticallyConnect())
         m_webSocket.open(QUrl(m_settingsWindow.serverIP()));
 
+    m_systemTrayIconMenu.addAction("Close");
+
+    m_systemTrayIcon.setToolTip("Hardware-Monitor");
+    m_systemTrayIcon.setContextMenu(&m_systemTrayIconMenu);
     m_systemTrayIcon.setVisible(true);
 }
 
@@ -67,6 +72,7 @@ void MainWindow::timerEvent(QTimerEvent *)
                     ui->mainDataTable->removeRow(i);
 
                 ui->mainDataTable->setRowCount(data.size());
+                ui->mainDataTable->horizontalHeader()->show();
 
                 int idx = 0;
                 for(const auto& i : data)
@@ -226,5 +232,10 @@ void MainWindow::trayActivated(QSystemTrayIcon::ActivationReason reason)
         }
     break;
     }
+}
+
+void MainWindow::trayMenuTriggered(QAction *)
+{
+    close();
 }
 

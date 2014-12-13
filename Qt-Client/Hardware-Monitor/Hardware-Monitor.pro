@@ -23,3 +23,6 @@ HEADERS  += MainWindow.h \
 
 FORMS    += MainWindow.ui \
     SettingsWindow.ui
+
+RESOURCES += \
+    Resource.qrc

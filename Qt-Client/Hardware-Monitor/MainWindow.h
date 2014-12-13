@@ -7,6 +7,7 @@
 #include <QHideEvent>
 #include <QShowEvent>
 #include <QSystemTrayIcon>
+#include <QMenu>
 
 #include "SettingsWindow.h"
 
@@ -38,12 +39,14 @@ private:
     SettingsWindow m_settingsWindow;
     QWebSocket m_webSocket;
     QSystemTrayIcon m_systemTrayIcon;
+    QMenu m_systemTrayIconMenu;
 
 private slots:
     void stateChanged(QAbstractSocket::SocketState state);
     void onConnect();
     void onDisconnect();
     void trayActivated(QSystemTrayIcon::ActivationReason reason);
+    void trayMenuTriggered(QAction *action);
 };
 
 #endif // MAINWINDOW_H
