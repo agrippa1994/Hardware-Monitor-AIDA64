@@ -1,120 +1,82 @@
-var WebSocketServer = require('websocket').server;
-var http = require('http');
 var fs = require("fs");
-var url = require("url");
-var path = require("path");
-var mysql = require("mysql");
+var expressWS = require("express-ws")(require("express")());
 
-var mysql_connection;
-var httpServer;
-var wsServer;
-var connections = [];
+var app = expressWS.app;
 
-try {
-    httpServer = http.createServer();
-    httpServer.listen(from_string(fs.readFileSync("config.json")).http.port);
-} catch (err) {
-    console.log("Error while creating HTTP server: " + err);
-    process.exit();
-}
+app.ws('/sensor', function(ws, req) {
+	ws.data = {};
+	ws.data.computerName = "";
+	ws.data.sensorData = {};
 
-try {
-    wsServer = new WebSocketServer({
-        httpServer: httpServer,
-        autoAcceptConnections: false
-    });
-} catch (err) {
-    console.error("Error while creating WebSocket server on the HTTP server socket: " + err);
-    process.exit();
-}
+	ws.on('message', function(msg) {
+		try {
+			var data = JSON.parse(msg);
 
-try {
-    mysql_connection = mysql.createConnection(from_string(fs.readFileSync("config.json")).mysql);
-    mysql_connection.connect(function (err) {
-        if (err) {
-            console.error("Error while connecting to the datebase: " + err);
-            process.exit();
-        } else {
-            console.log("Connection to the database has been established");
-        }
-    });
-} catch (error) {
-    console.error("Error while creating mysql-connection: " + err);
-    process.exit();
-}
+			if (typeof data.computerName === "string")
+				ws.data.computerName = data.computerName;
 
+			if (typeof data.sensorValues === "object")
+				ws.data.sensorData = data.sensorValues;
 
-function from_string(jsonString)
-{
-	try {
-		var o = JSON.parse(jsonString);
-		if (o && typeof o === "object" && o !== null)
-			return o;
-	}
-	catch (e) { }
+			expressWS.clientsForRoute("/client").filter(function(client) {
+				return ws.data.computerName == client.data.watchComputer && ws.data.sensorData != null;
+			}).forEach(function(client) {
+				client.send(JSON.stringify(ws.data.sensorData));
+			});
 
-	return false;
-}
-
-function to_string(object) {
-	try {
-		var s = JSON.stringify(object);
-		if(s && typeof s === "string" && s !== null)
-			return s;
-	}
-	catch(e) { }
-
-	return false;
-}
-
-function onClientConnect(connection) {
-    connections.push(connection);
-}
-
-function onClientDisconnect(connection) {
-	var index = connections.indexOf(connection);
-		if(index > -1)
-			connections.splice(index, 1);
-}
-
-function onClientMessage(connection, messageStr) {
-	var message = from_string(messageStr);
-		if(message == false)
-			return;
-
-	if(!("computerName" in message && "sensorValues" in message && "userName" in message))
-		return;
-    
-	var sendee = to_string(message.sensorValues);
-	for(var i = 0; i < connections.length; i++) {
-		if(connections[i] == connection)
-			continue;
-
-		connections[i].send(sendee);
-	}
-}
-
-httpServer.on("error", function(e) {
-	console.error("Error @http (" + e + ")");
-});
-
-wsServer.on('request', function(request) {
-	var connection;
-	try {
-		connection = request.accept(null, request.origin);
-	} catch(e) {
-		console.error("Illegal connection");
-		return;
-	}
-
-	onClientConnect(connection);
-
-	connection.on('message', function(message) {
-		if(message.type === 'utf8') 
-			onClientMessage(connection, message.utf8Data);
+		} catch (e) {
+			ws.close();
+		}
 	});
 
-	connection.on('close', function(reasonCode, description) {
-		onClientDisconnect(connection);
+	ws.on("close", function() {
+		expressWS.clientsForRoute("/client").filter(function(client) {
+			return ws.data.computerName == client.data.watchComputer;
+		}).forEach(function(client) {
+			client.close();
+		});
 	});
 });
+
+app.ws("/client", function(ws) {
+	ws.data = {};
+	ws.data.watchComputer = "";
+
+	ws.on("message", function(msg) {
+		try {
+			var data = JSON.parse(msg);
+
+			if (typeof data.watchComputer === "string")
+				ws.data.watchComputer = data.watchComputer;
+
+		} catch (e) {
+			ws.close();
+		}
+	});
+});
+
+app.get("/api/computers", function(req, res) {
+	var array = [];
+	expressWS.clientsForRoute("/sensor").filter(function(client) {
+		return client.data.computerName != "" && client.data.sensorData != null;
+	}).forEach(function(client) {
+		array.push(client.data);
+	});
+	res.status(200).send(JSON.stringify(array));
+});
+
+app.get("*", function(req, res) {
+	res.sendFile(__dirname + "/web/" + (req.params["0"] || "index.html"), function(err) {
+		if (err) {
+			res.sendStatus(err.status);
+		}
+	});
+});
+
+
+try {
+	app.listen(JSON.parse(fs.readFileSync("config.json")).http.port);
+} catch (err) {
+	console.log("Error while creating HTTP server: " + err);
+	process.exit();
+}
