@@ -157,7 +157,7 @@ ClientBin/
 *.dbproj.schemaview
 *.pfx
 *.publishsettings
-node_modules/
+Server/node_modules/
 
 # RIA/Silverlight projects
 Generated_Code/
@@ -223,3 +223,4 @@ Makefile*
 build-*
 
 /Server/Hardware-Monitor-Server.sln
+!Electron-Client/*

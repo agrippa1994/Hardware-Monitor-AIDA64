@@ -1,0 +1,8 @@
+{
+  "name": "Hardware-Monitor",
+  "productName": "Hardware-Monitor",
+  "main": "main.js",
+  "devDependencies": {
+    "electron-rebuild": "^0.2.5"
+  }
+}
