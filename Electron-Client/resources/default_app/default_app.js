@@ -1,6 +1,5 @@
 var app = require('app');
 var BrowserWindow = require('browser-window');
-var aida64 = require("node-aida64");
 
 var mainWindow = null;
 
@@ -15,10 +14,6 @@ app.on('ready', function() {
     height: 600,
     'auto-hide-menu-bar': true,
     'use-content-size': true,
-  });
-
-  aida64.readAIDA64(function(err, data){
-      alert("dyasf");
   });
   
   mainWindow.loadUrl('file://' + __dirname + '/index.html');
