@@ -17,6 +17,12 @@ angular.module("route", [])
             }
         )
     
+        .when("/graphs", {
+                templateUrl: "html/graphsview.html",
+                controller: "GraphsViewController"
+            }
+        )
+    
         .otherwise("/");
 })
 

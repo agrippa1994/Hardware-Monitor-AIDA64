@@ -20,25 +20,25 @@ angular.module("services", [])
         return data;
     }
     
-    return {
-        fetchAsync: function(callback) {
-            return aida64.readAIDA64(function(err, data){
-                callback(err, prepareData(data));
-            });
-        },
-        
-        fetchSync: function(callback) {
-            callback = callback || function() {};
-            
-            try {
-                var data = aida64.readAIDA64Sync();
-                data = prepareData(data);
-                
-                callback(null, data);
-                return data;
-            } catch(e) {
-                callback(e, null);
-            }
+    var obj = aida64;
+    obj.fetchAsync = function(callback) {
+        return aida64.readAIDA64(function(err, data){
+            callback(err, prepareData(data));
+        });
+    };
+    
+    obj.fetchSync = function(callback) {
+        callback = callback || function() {};
+        try {
+            var data = aida64.readAIDA64Sync();
+            data = prepareData(data);
+
+            callback(null, data);
+            return data;
+        } catch(e) {
+            callback(e, null);
         }
-    }
+    };
+    
+    return obj;
 })

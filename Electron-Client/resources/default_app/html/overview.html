@@ -19,6 +19,48 @@
     </table>
 </div>
 
+<div ng-show="aidaData.pwr">
+    <h3>Power</h3>
+    <table class="table striped hovered border">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Value</th>
+            </tr>
+        </thead>
+
+        <tbody ng-repeat="value in aidaData.pwr">
+                <tr>
+                    <td>{{ value.id }}</td>
+                    <td>{{ value.label }}</td>
+                    <td>{{ value.value }}</td>
+                </tr>
+        </tbody>
+    </table>
+</div>
+
+<div ng-show="aidaData.duty">
+    <h3>Duty</h3>
+    <table class="table striped hovered border">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Value</th>
+            </tr>
+        </thead>
+
+        <tbody ng-repeat="value in aidaData.duty">
+                <tr>
+                    <td>{{ value.id }}</td>
+                    <td>{{ value.label }}</td>
+                    <td>{{ value.value }}</td>
+                </tr>
+        </tbody>
+    </table>
+</div>
+
 <div ng-show="aidaData.temp">
     <h3>Temperatures</h3>
     <table class="table striped hovered border">

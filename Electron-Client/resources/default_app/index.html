@@ -8,6 +8,7 @@
         <link href="css/main.css" rel="stylesheet">
     
         <script src="js/lib/metro.js"></script>
+        <script src="js/Chart.js"></script>
         <script src="js/lib/angular.js"></script>
         <script src="js/lib/angular-resource.js"></script>
         <script src="js/lib/angular-route.js"></script>
@@ -22,7 +23,7 @@
 
     <body ng-controller="MainController">
         <menubar></menubar>
-        <div class="page-content">
+        <div class="page-content" id="mainContent">
             <ng-view></ng-view>
         </div>
     </body>
